@@ -1,0 +1,1 @@
+export { Typed } from "./typed";

@@ -1,3 +1,4 @@
+import { Animation } from "./animation/Animation";
 import { EventsQueue } from "./event/EventsQueue";
 import { EventType } from "./event/TypedEvent";
 import { Typed } from "./typed";
@@ -41,5 +42,19 @@ describe('Typed', () => {
     typed.publishEvents(...events);
 
     expect(spyAddToEnd).toBeCalledWith(...events);
+  })
+
+  test('Should add pause event in queue when pause the animation', () => {
+    const typed = new Typed();
+    typed.pause(60);
+    expect(typed.events).toContainEqual({type: EventType.PAUSE, delay: 60});
+  })
+
+  test('Running animation should start animation', () => {
+    const typed = new Typed();
+    typed.typeCharacters("hello");
+    const spyAnimationStart = jest.spyOn(Animation.prototype, 'start');
+    typed.start();
+    expect(spyAnimationStart).toBeCalled();
   })
 })

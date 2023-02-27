@@ -1,20 +1,30 @@
+import { Animation } from "./animation/Animation";
+import { EventProducer } from "./event/EventProducer";
 import { EventsQueue } from "./event/EventsQueue";
 import TypedEvent, { EventType } from "./event/TypedEvent";
+import { deepCopy } from "./utils/deepCopy";
 
-export class Typed {
-
+export class Typed implements EventProducer {
   private eventsQueue: EventsQueue = new EventsQueue();
-  constructor() {
+
+  get queue(): EventsQueue {
+    return deepCopy<EventsQueue>(this.eventsQueue);
   }
 
-  public typeCharacters(characters: string): void {
+  private animation?: Animation;
+
+  constructor() {}
+
+  public typeCharacters(characters: string): Typed {
     const events = this.decomposeCharactersIntoEvents(characters);
     this.publishEvents(...events);
+    return this;
   }
 
   public decomposeCharactersIntoEvents(characters: string): TypedEvent[] {
     return Array.from(characters).map((character) => ({
-      type: EventType.TYPE_CHARACTER, character
+      type: EventType.TYPE_CHARACTER,
+      character,
     }));
   }
 
@@ -23,18 +33,15 @@ export class Typed {
   }
 
   public start(): void {
-
+    this.animation = new Animation(this.queue);
+    this.animation.start();
   }
 
   public pause(delay: number): void {
-
+    this.publishEvents({ type: EventType.PAUSE, delay });
   }
 
   public stop(): void {
-
-  }
-
-  public run(startTime: DOMHighResTimeStamp): void {
-
+    this.animation?.stop();
   }
 }
