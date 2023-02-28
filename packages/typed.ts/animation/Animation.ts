@@ -13,7 +13,7 @@ import { AnimationConfig } from "./AnimationConfig";
 
 const NO_ANIMATION = 0;
 
-const DEFAULT_ANIMATION_CONFIG: AnimationConfig = {
+export const DEFAULT_ANIMATION_CONFIG: AnimationConfig = {
   loop: false,
 };
 
@@ -25,7 +25,11 @@ export class Animation implements EventConsumer {
 
   private nodeManager = new NodeManager();
 
-  constructor(private queue: EventsQueue, config?: AnimationConfig) {
+  constructor(
+    private container: Element,
+    private queue: EventsQueue,
+    config?: AnimationConfig
+  ) {
     this.id = NO_ANIMATION;
     this.lastFrame = performance.now();
     this.config = config || DEFAULT_ANIMATION_CONFIG;
@@ -99,7 +103,7 @@ export class Animation implements EventConsumer {
   private typeCharacter(event: TypeCharacterEvent): void {
     const { character, element } = event;
     const textNode = document.createTextNode(character);
-    document.body.appendChild(textNode);
+    this.container.appendChild(textNode);
     this.consumedEvents.addToEnd({ ...event, textNode });
     this.nodeManager.addToEnd({
       type: NodeType.TEXT_NODE,
@@ -110,7 +114,7 @@ export class Animation implements EventConsumer {
 
   private deleteLastVisibleNode(): void {
     const { node } = this.nodeManager.removeLastNode();
-    document.body.removeChild(node);
+    this.container.removeChild(node);
   }
 
   private deleteAllVisibleNodes(): void {

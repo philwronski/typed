@@ -12,7 +12,7 @@ describe("Animation", () => {
       { type: EventType.TYPE_CHARACTER, character: "l" },
       { type: EventType.TYPE_CHARACTER, character: "o" }
     );
-    const animation = new Animation(eventQueue);
+    const animation = new Animation(document.body, eventQueue);
 
     const spyRequestAnimationFrame = jest.spyOn(
       window,
@@ -31,7 +31,7 @@ describe("Animation", () => {
       { type: EventType.TYPE_CHARACTER, character: "l" },
       { type: EventType.TYPE_CHARACTER, character: "o" }
     );
-    const animation = new Animation(eventQueue);
+    const animation = new Animation(document.body, eventQueue);
     const spyCancelAnimationFrame = jest.spyOn(window, "cancelAnimationFrame");
 
     const animationId = animation.stop();

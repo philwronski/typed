@@ -1,4 +1,5 @@
-import { Animation } from "./animation/Animation";
+import { Animation, DEFAULT_ANIMATION_CONFIG } from "./animation/Animation";
+import { AnimationConfig } from "./animation/AnimationConfig";
 import { EventProducer } from "./event/EventProducer";
 import { EventsQueue } from "./event/EventsQueue";
 import TypedEvent, { EventType } from "./event/TypedEvent";
@@ -12,8 +13,25 @@ export class Typed implements EventProducer {
   }
 
   private animation?: Animation;
+  private animationConfig?: AnimationConfig;
 
-  constructor() {}
+  private container: Element;
+
+  constructor(container: string | Element, animationConfig?: AnimationConfig) {
+    if (typeof container === "string") {
+      const containerElement = document.querySelector(container);
+      if (!containerElement) {
+        throw new DOMException(
+          `Container ${container} must be a valid DOM element`
+        );
+      }
+      this.container = containerElement;
+    } else {
+      this.container = container;
+    }
+
+    this.animationConfig = animationConfig || DEFAULT_ANIMATION_CONFIG;
+  }
 
   public typeCharacters(characters: string): Typed {
     const events = this.decomposeCharactersIntoEvents(characters);
@@ -33,7 +51,7 @@ export class Typed implements EventProducer {
   }
 
   public start(): void {
-    this.animation = new Animation(this.queue);
+    this.animation = new Animation(this.container, this.queue);
     this.animation.start();
   }
 
