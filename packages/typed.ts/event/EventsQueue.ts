@@ -32,7 +32,7 @@ export class EventsQueue {
 
   public getLastElement(): TypedEvent {
     if (this.queue.length) {
-      return this.queue.slice(-1, 1)[0];
+      return this.queue.slice(-1)[0];
     }
     throw new EmptyQueueError("Impossible to get the last event.");
   }

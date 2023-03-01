@@ -14,7 +14,6 @@ export type TypeCharacterEvent = {
   type: EventType.TYPE_CHARACTER;
   character: string;
   element?: Element;
-  textNode?: Text;
 };
 
 export type CallbackEvent = {

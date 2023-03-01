@@ -62,4 +62,13 @@ describe("Typed", () => {
     typed.start();
     expect(spyAnimationStart).toBeCalled();
   });
+
+  test("Remove element from should add event into queue", () => {
+    const typed = new Typed(document.body);
+    const spyPublishEvent = jest.spyOn(typed, "publishEvents");
+    typed.typeCharacters("hello").deleteLastNthCharacters(1);
+    expect(typed.queue.getLastElement()).toStrictEqual({
+      type: EventType.DELETE_LAST_VISIBLE_NODE,
+    });
+  });
 });

@@ -104,7 +104,7 @@ export class Animation implements EventConsumer {
     const { character, element } = event;
     const textNode = document.createTextNode(character);
     this.container.appendChild(textNode);
-    this.consumedEvents.addToEnd({ ...event, textNode });
+    this.consumedEvents.addToEnd({ ...event });
     this.nodeManager.addToEnd({
       type: NodeType.TEXT_NODE,
       character,

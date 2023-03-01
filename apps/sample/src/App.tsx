@@ -5,7 +5,11 @@ import "./App.css";
 function App() {
   useEffect(() => {
     const typed = new Typed("#typed");
-    typed.typeCharacters("hello").start();
+    typed
+      .typeCharacters("hello toto")
+      .deleteLastNthCharacters(4)
+      .typeCharacters("world !")
+      .start();
   });
 
   return <div id="typed"></div>;

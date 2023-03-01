@@ -39,6 +39,13 @@ export class Typed implements EventProducer {
     return this;
   }
 
+  public deleteLastNthCharacters(nth: number): Typed {
+    for (let i = 0; i < nth; i++) {
+      this.publishEvents({ type: EventType.DELETE_LAST_VISIBLE_NODE });
+    }
+    return this;
+  }
+
   public decomposeCharactersIntoEvents(characters: string): TypedEvent[] {
     return Array.from(characters).map((character) => ({
       type: EventType.TYPE_CHARACTER,
