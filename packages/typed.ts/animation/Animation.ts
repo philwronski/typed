@@ -9,12 +9,15 @@ import TypedEvent, {
 import { NodeType } from "../node/Node";
 import { NodeManager } from "../node/NodeManager";
 import getRandomInteger from "../utils/getRandomInteger";
+import { styled } from "../utils/styled";
+import "./animation.css";
 import { AnimationConfig } from "./AnimationConfig";
 
 const NO_ANIMATION = 0;
 
 export const DEFAULT_ANIMATION_CONFIG: AnimationConfig = {
-  loop: false,
+  loop: true,
+  cursor: "|",
 };
 
 export class Animation implements EventConsumer {
@@ -25,17 +28,23 @@ export class Animation implements EventConsumer {
 
   private nodeManager = new NodeManager();
 
+  private inputContainer: HTMLElement;
+  private cursorContainer: HTMLElement;
+
   constructor(
-    private container: Element,
+    private container: HTMLElement,
     private queue: EventsQueue,
     config?: AnimationConfig
   ) {
     this.id = NO_ANIMATION;
     this.lastFrame = performance.now();
     this.config = config || DEFAULT_ANIMATION_CONFIG;
+    this.inputContainer = document.createElement("span");
+    this.cursorContainer = document.createElement("span");
   }
 
   public start(): number {
+    this.buildUI();
     this.id = requestAnimationFrame((startTime) => {
       this.run(startTime);
     });
@@ -95,15 +104,15 @@ export class Animation implements EventConsumer {
         this.typeCharacter(event);
         break;
       case EventType.DELETE_LAST_VISIBLE_NODE:
-        this.deleteLastVisibleNode();
+        this.deleteLastVisibleNode(event);
         break;
     }
   }
 
   private typeCharacter(event: TypeCharacterEvent): void {
-    const { character, element } = event;
+    const { character } = event;
     const textNode = document.createTextNode(character);
-    this.container.appendChild(textNode);
+    this.inputContainer.appendChild(textNode);
     this.consumedEvents.addToEnd({ ...event });
     this.nodeManager.addToEnd({
       type: NodeType.TEXT_NODE,
@@ -112,15 +121,19 @@ export class Animation implements EventConsumer {
     });
   }
 
-  private deleteLastVisibleNode(): void {
+  private deleteLastVisibleNode(event: DeleteLastVisibleNodeEvent): void {
     const { node } = this.nodeManager.removeLastNode();
-    this.container.removeChild(node);
+    this.inputContainer.removeChild(node);
+    if (!event.fromLoop) {
+      this.consumedEvents.addToEnd({ ...event });
+    }
   }
 
   private deleteAllVisibleNodes(): void {
     const deleteEvents: DeleteLastVisibleNodeEvent[] =
-      this.consumedEvents.events.map((event) => ({
+      this.consumedEvents.events.map(() => ({
         type: EventType.DELETE_LAST_VISIBLE_NODE,
+        fromLoop: true,
       }));
     this.queue.addToEnd(...deleteEvents.reverse());
   }
@@ -130,5 +143,29 @@ export class Animation implements EventConsumer {
     this.queue.addToEnd(...this.consumedEvents.events);
     this.consumedEvents = new EventsQueue();
     this.requestNextAnimationFrame();
+  }
+
+  private buildUI(): void {
+    this.inputContainer.className = "typed__input";
+    styled(this.inputContainer, {
+      verticalAlign: "middle",
+    });
+
+    this.cursorContainer.className = "typed__cursor";
+    this.container.appendChild(this.inputContainer);
+    const { cursor } = this.config;
+    let cursorElement;
+    if (typeof cursor === "string") {
+      cursorElement = document.createTextNode(cursor);
+      styled(this.cursorContainer, {
+        animation: "Typewriter-cursor 1s infinite",
+        marginLeft: "-2px",
+      });
+    } else {
+      cursorElement = cursor;
+    }
+
+    this.cursorContainer.appendChild(cursorElement);
+    this.container.appendChild(this.cursorContainer);
   }
 }

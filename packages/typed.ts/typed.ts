@@ -58,7 +58,7 @@ export class Typed implements EventProducer {
   }
 
   public start(): void {
-    this.animation = new Animation(this.container, this.queue);
+    this.animation = new Animation(this.container as HTMLElement, this.queue);
     this.animation.start();
   }
 

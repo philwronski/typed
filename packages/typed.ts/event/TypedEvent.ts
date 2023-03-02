@@ -37,6 +37,7 @@ export type PauseEvent = {
 
 export type DeleteLastVisibleNodeEvent = {
   type: EventType.DELETE_LAST_VISIBLE_NODE;
+  fromLoop?: boolean;
 };
 
 export type RemoveAllEvent = {
