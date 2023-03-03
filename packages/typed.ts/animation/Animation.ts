@@ -4,6 +4,7 @@ import { EventsQueue } from "../event/EventsQueue";
 import TypedEvent, {
   DeleteLastVisibleNodeEvent,
   EventType,
+  PauseEvent,
   TypeCharacterEvent,
 } from "../event/TypedEvent";
 import { NodeType } from "../node/Node";
@@ -14,6 +15,7 @@ import "./animation.css";
 import { AnimationConfig } from "./AnimationConfig";
 
 const NO_ANIMATION = 0;
+const PAUSE_ANIMATION = 0;
 
 export const DEFAULT_ANIMATION_CONFIG: AnimationConfig = {
   loop: true,
@@ -30,6 +32,8 @@ export class Animation implements EventConsumer {
 
   private inputContainer: HTMLElement;
   private cursorContainer: HTMLElement;
+
+  private pauseDelay: DOMHighResTimeStamp = PAUSE_ANIMATION;
 
   constructor(
     private container: HTMLElement,
@@ -54,7 +58,10 @@ export class Animation implements EventConsumer {
 
   public run(startTime: DOMHighResTimeStamp): void {
     const timeElapsedSinceLastFrame = startTime - this.lastFrame;
-    const eventDelay = getRandomInteger(80, 640);
+    let eventDelay = getRandomInteger(80, 640);
+    if (!this.isAnimationPaused()) {
+      eventDelay = this.pauseDelay;
+    }
 
     const mustWait = this.waitUntilForTheNextFrame(
       timeElapsedSinceLastFrame,
@@ -62,6 +69,10 @@ export class Animation implements EventConsumer {
     );
     if (mustWait) {
       return;
+    }
+
+    if (!this.isAnimationPaused()) {
+      this.pauseDelay = PAUSE_ANIMATION;
     }
 
     try {
@@ -105,6 +116,9 @@ export class Animation implements EventConsumer {
         break;
       case EventType.DELETE_LAST_VISIBLE_NODE:
         this.deleteLastVisibleNode(event);
+        break;
+      case EventType.PAUSE:
+        this.pauseFor(event);
         break;
     }
   }
@@ -167,5 +181,14 @@ export class Animation implements EventConsumer {
 
     this.cursorContainer.appendChild(cursorElement);
     this.container.appendChild(this.cursorContainer);
+  }
+
+  private pauseFor(event: PauseEvent): void {
+    this.pauseDelay = event.delay;
+    this.consumedEvents.addToEnd({ ...event });
+  }
+
+  private isAnimationPaused(): boolean {
+    return this.pauseDelay === PAUSE_ANIMATION;
   }
 }

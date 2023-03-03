@@ -32,7 +32,7 @@ export type ChangeDeleteSpeedEvent = {
 
 export type PauseEvent = {
   type: EventType.PAUSE;
-  delay: number;
+  delay: number; // in millisecond
 };
 
 export type DeleteLastVisibleNodeEvent = {

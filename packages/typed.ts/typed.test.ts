@@ -48,7 +48,7 @@ describe("Typed", () => {
 
   test("Should add pause event in queue when pause the animation", () => {
     const typed = new Typed(document.body);
-    typed.pause(60);
+    typed.pauseFor(60);
     expect(typed.queue.events).toContainEqual({
       type: EventType.PAUSE,
       delay: 60,
@@ -65,7 +65,6 @@ describe("Typed", () => {
 
   test("Remove element from should add event into queue", () => {
     const typed = new Typed(document.body);
-    const spyPublishEvent = jest.spyOn(typed, "publishEvents");
     typed.typeCharacters("hello").deleteLastNthCharacters(1);
     expect(typed.queue.getLastElement()).toStrictEqual({
       type: EventType.DELETE_LAST_VISIBLE_NODE,

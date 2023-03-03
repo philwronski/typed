@@ -9,6 +9,7 @@ function App() {
       .typeCharacters("hello toto")
       .deleteLastNthCharacters(4)
       .typeCharacters("world !")
+      .pauseFor(3000)
       .start();
   });
 

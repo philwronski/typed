@@ -62,8 +62,9 @@ export class Typed implements EventProducer {
     this.animation.start();
   }
 
-  public pause(delay: number): void {
+  public pauseFor(delay: number): Typed {
     this.publishEvents({ type: EventType.PAUSE, delay });
+    return this;
   }
 
   public stop(): void {
