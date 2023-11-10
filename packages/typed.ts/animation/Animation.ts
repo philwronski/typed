@@ -2,6 +2,7 @@ import { EmptyQueueError } from "../event/EmptyQueueError";
 import { EventConsumer } from "../event/EventConsumer";
 import { EventsQueue } from "../event/EventsQueue";
 import TypedEvent, {
+  AppendEmptyHTMLElement,
   DeleteLastVisibleNodeEvent,
   EventType,
   PauseEvent,
@@ -10,7 +11,6 @@ import TypedEvent, {
 import { NodeType } from "../node/Node";
 import { NodeManager } from "../node/NodeManager";
 import getRandomInteger from "../utils/getRandomInteger";
-import { styled } from "../utils/styled";
 import "./animation.css";
 import { AnimationConfig } from "./AnimationConfig";
 
@@ -18,7 +18,7 @@ const NO_ANIMATION = 0;
 const PAUSE_ANIMATION = 0;
 
 export const DEFAULT_ANIMATION_CONFIG: AnimationConfig = {
-  loop: true,
+  loop: false,
   cursor: "|",
 };
 
@@ -26,29 +26,21 @@ export class Animation implements EventConsumer {
   private id: number;
   private lastFrame: DOMHighResTimeStamp;
   private consumedEvents = new EventsQueue();
-  private config: AnimationConfig;
 
   private nodeManager = new NodeManager();
-
-  private inputContainer: HTMLElement;
-  private cursorContainer: HTMLElement;
 
   private pauseDelay: DOMHighResTimeStamp = PAUSE_ANIMATION;
 
   constructor(
     private container: HTMLElement,
     private queue: EventsQueue,
-    config?: AnimationConfig
+    private config: AnimationConfig
   ) {
     this.id = NO_ANIMATION;
     this.lastFrame = performance.now();
-    this.config = config || DEFAULT_ANIMATION_CONFIG;
-    this.inputContainer = document.createElement("span");
-    this.cursorContainer = document.createElement("span");
   }
 
   public start(): number {
-    this.buildUI();
     this.id = requestAnimationFrame((startTime) => {
       this.run(startTime);
     });
@@ -114,6 +106,9 @@ export class Animation implements EventConsumer {
       case EventType.TYPE_CHARACTER:
         this.typeCharacter(event);
         break;
+      case EventType.APPEND_EMPTY_HTML_ELEMENT:
+        this.appendEmptyHtmlElement(event);
+        break;
       case EventType.DELETE_LAST_VISIBLE_NODE:
         this.deleteLastVisibleNode(event);
         break;
@@ -126,7 +121,8 @@ export class Animation implements EventConsumer {
   private typeCharacter(event: TypeCharacterEvent): void {
     const { character } = event;
     const textNode = document.createTextNode(character);
-    this.inputContainer.appendChild(textNode);
+    const container = event.container || this.container;
+    container.appendChild(textNode);
     this.consumedEvents.addToEnd({ ...event });
     this.nodeManager.addToEnd({
       type: NodeType.TEXT_NODE,
@@ -135,9 +131,14 @@ export class Animation implements EventConsumer {
     });
   }
 
+  private appendEmptyHtmlElement(event: AppendEmptyHTMLElement): void {
+    const { element } = event;
+    this.container.appendChild(element);
+  }
+
   private deleteLastVisibleNode(event: DeleteLastVisibleNodeEvent): void {
     const { node } = this.nodeManager.removeLastNode();
-    this.inputContainer.removeChild(node);
+    this.container.removeChild(node);
     if (!event.fromLoop) {
       this.consumedEvents.addToEnd({ ...event });
     }
@@ -157,30 +158,6 @@ export class Animation implements EventConsumer {
     this.queue.addToEnd(...this.consumedEvents.events);
     this.consumedEvents = new EventsQueue();
     this.requestNextAnimationFrame();
-  }
-
-  private buildUI(): void {
-    this.inputContainer.className = "typed__input";
-    styled(this.inputContainer, {
-      verticalAlign: "middle",
-    });
-
-    this.cursorContainer.className = "typed__cursor";
-    this.container.appendChild(this.inputContainer);
-    const { cursor } = this.config;
-    let cursorElement;
-    if (typeof cursor === "string") {
-      cursorElement = document.createTextNode(cursor);
-      styled(this.cursorContainer, {
-        animation: "Typewriter-cursor 1s infinite",
-        marginLeft: "-2px",
-      });
-    } else {
-      cursorElement = cursor;
-    }
-
-    this.cursorContainer.appendChild(cursorElement);
-    this.container.appendChild(this.cursorContainer);
   }
 
   private pauseFor(event: PauseEvent): void {

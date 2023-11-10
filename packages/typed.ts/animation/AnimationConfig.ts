@@ -1,4 +1,4 @@
 export type AnimationConfig = {
-  loop: boolean;
-  cursor: string | Element;
+  loop?: boolean;
+  cursor?: string | Element;
 };

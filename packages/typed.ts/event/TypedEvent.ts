@@ -1,6 +1,6 @@
 export enum EventType {
   TYPE_CHARACTER = "TYPE_CHARACTER",
-  REMOVE_CHARACTER = "REMOVE_CHARACTER",
+  APPEND_EMPTY_HTML_ELEMENT = "APPEND_EMPTY_HTML_ELEMENT",
   REMOVE_ALL = "REMOVE_ALL",
   DELETE_LAST_VISIBLE_NODE = "DELETE_LAST_VISIBLE_NODE",
   PAUSE = "PAUSE",
@@ -13,7 +13,13 @@ export enum EventType {
 export type TypeCharacterEvent = {
   type: EventType.TYPE_CHARACTER;
   character: string;
-  element?: Element;
+  container: Element;
+};
+
+export type AppendEmptyHTMLElement = {
+  type: EventType.APPEND_EMPTY_HTML_ELEMENT;
+  element: Element;
+  parent?: Element;
 };
 
 export type CallbackEvent = {
@@ -46,6 +52,7 @@ export type RemoveAllEvent = {
 
 type TypedEvent =
   | TypeCharacterEvent
+  | AppendEmptyHTMLElement
   | CallbackEvent
   | ChangeWriteSpeedEvent
   | ChangeDeleteSpeedEvent
